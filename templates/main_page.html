@@ -24,7 +24,7 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="#">My scratchpad</a>
+            <a class="navbar-brand" href="#">Mallory's Blog</a>
         </div>
     </div>
 </nav>
@@ -32,24 +32,12 @@
 
     <div class="container">
 
-
+        {% for comment in comments %}
             <div class="row">
-
-                This is the first dummy comment.
-
+                {{comment}}
             </div>
+        {% endfor %}
 
-            <div class="row">
-
-                This is the second dummy comment. It's almost the same as the first.
-
-            </div>
-
-            <div class="row">
-
-                This is the third comment. It means nothing.
-
-            </div>
 
             <div class="row">
 
@@ -61,7 +49,7 @@
 
             </div>
 
-            </div><!-- /.container -->
+    </div><!-- /.container -->
 
         </body>
 

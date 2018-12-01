@@ -28,15 +28,16 @@ class Comment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.String(4096))
 
-#Empty list to hold the comments
-comments = []
 
 @app.route("/", methods=["GET", "POST"]) # GET allows users to view the page, POST sends data
 def index():
     if request.method == "GET":
-        return render_template("main_page.html", comments=comments)
+        return render_template("main_page.html", comments=Comment.query.all())
 
-    #If the request is not a GET, it is a POST and this code will execute
-    comments.append(request.form["contents"])
-    return redirect (url_for('index'))
+    #If the request is not a GET, it is a POST (send data) and this code will execute
+    if request.method == "POST":
+        comment = Comment(content=request.form["contents"]) #Creates the comment object and assigns it to a variable
+        db.session.add(comment) #Sends the command to the database, leaves a transaction open
+        db.session.commit() #Commits the changes to the db and closes the transaction
+        return redirect (url_for('index'))
 

@@ -2,6 +2,8 @@
 
 from flask import Flask, redirect, render_template, request, url_for
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import login_user, LoginManager, UserMixin, logout_user, login_required
+from werkzeug.security import check_password_hash, generate_password_hash
 
 
 app = Flask(__name__)
@@ -20,7 +22,39 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
 
-#Creates a class to hold the comments using a model
+#Set up the login system
+app.secret_key = "bdyew87ahdiuaWGS0'MG" # Secret random key used for cryptography
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+#Defines a "User" class
+class User(UserMixin):
+
+    def __init__(self, username, password_hash):
+        self.username = username
+        self.password_hash = password_hash
+
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+
+    def get_id(self):
+        return self.username
+
+#A dictionary of default users
+all_users = {
+    "admin": User("admin", generate_password_hash("secret")),
+    "bob": User("bob", generate_password_hash("less-secret")),
+    "caroline": User("caroline", generate_password_hash("completely-secret")),
+}
+
+#A function that accepts a string(username) and returns a corresponding User object from a dictionary
+@login_manager.user_loader
+def load_user(user_id):
+    return all_users.get(user_id)
+
+#Defines a class to hold the comments using a model
 class Comment(db.Model):
 
     __tablename__ = "comments"
@@ -28,7 +62,7 @@ class Comment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.String(4096))
 
-#Display the default page
+#Define the default or "index" VIEW
 @app.route("/", methods=["GET", "POST"]) # GET allows users to view the page, POST sends data
 def index():
     if request.method == "GET":
@@ -41,7 +75,28 @@ def index():
         db.session.commit() #Commits the changes to the db and closes the transaction
         return redirect (url_for('index'))
 
-#Display the login html page
-@app.route("/login/")
+#Login VIEW
+@app.route("/login/", methods=["GET", "POST"])
 def login():
-    return render_template("login_page.html")
+    if request.method == "GET":
+        return render_template("login_page.html", error=False)
+
+    if request.method == "POST":
+        username = request.form["username"]
+        if username not in all_users:
+            return render_template("login_page.html", error=True)
+        else: #If the username is in the list, assign it to the user variable
+            user = all_users[username]
+
+        if not user.check_password(request.form["password"]):
+            return render_template("login_page.html", error=True)
+        else: #If the password matches, log the user in
+            login_user(user)
+            return redirect(url_for('index'))
+
+#Logout VIEW
+@app.route("/logout/")
+@login_required #This means that the logout view can only be viewed by users that are logged in
+def logout():
+    logout_user()
+    return redirect (url_for('index'))

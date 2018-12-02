@@ -26,6 +26,14 @@
             </button>
             <a class="navbar-brand" href="#">Mallory's Comments</a>
         </div>
+        <ul class="nav navbar-nav navbar-right">
+        {% if current_user.is_authenticated %}
+            <li><a href="{{ url_for('logout') }}">Log out</a></li>
+        {% else %}
+            <li><a href="{{ url_for('login') }}">Log in</a></li>
+        {% endif %}
+    </ul>
+
     </div>
 </nav>
 
@@ -39,6 +47,8 @@
         {% endfor %}
 
 
+            {% if current_user.is_authenticated %} <!--IF THE USER IS LOGGED IN, MAKE THE "ENTER A COMMENT" SECTION VIEWABLE-->
+
             <div class="row">
 
                 <form action="." method="POST">
@@ -48,6 +58,7 @@
                 </form>
 
             </div>
+            {% endif %}
 
     </div><!-- /.container -->
 

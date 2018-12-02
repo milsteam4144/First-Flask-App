@@ -2,8 +2,9 @@
 
 from flask import Flask, redirect, render_template, request, url_for
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import login_user, LoginManager, UserMixin, logout_user, login_required
+from flask_login import login_user, LoginManager, UserMixin, logout_user, login_required, current_user
 from werkzeug.security import check_password_hash, generate_password_hash
+from datetime import datetime
 
 
 app = Flask(__name__)
@@ -62,14 +63,16 @@ class Comment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.String(4096))
 
-#Define the default or "index" VIEW
+#Define the "index" VIEW
 @app.route("/", methods=["GET", "POST"]) # GET allows users to view the page, POST sends data
 def index():
     if request.method == "GET":
-        return render_template("main_page.html", comments=Comment.query.all())
+        return render_template("main_page.html", comments=Comment.query.all(), timestamp=datetime.now())
 
     #If the request is not a GET, it is a POST (send data) and this code will execute
     if request.method == "POST":
+        if not current_user.is_authenticated: #If the user is not logged in, redirect them to same page, but do not post the comment
+            return redirect(url_for('index'))
         comment = Comment(content=request.form["contents"]) #Creates the comment object and assigns it to a variable
         db.session.add(comment) #Sends the command to the database, leaves a transaction open
         db.session.commit() #Commits the changes to the db and closes the transaction

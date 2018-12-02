@@ -4,7 +4,7 @@ from flask import Flask, redirect, render_template, request, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import login_user, LoginManager, UserMixin, logout_user, login_required, current_user
-from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.security import check_password_hash
 from datetime import datetime
 
 
@@ -33,11 +33,13 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 #Defines a "User" class
-class User(UserMixin):
+class User(UserMixin, db.Model): #The user class inherits from both Flask-Login's UserMixin and SQLAlchemy's db.Model
 
-    def __init__(self, username, password_hash):
-        self.username = username
-        self.password_hash = password_hash
+    __tablename__ = "users" #This syntax comes from SQLAlchemy's db.Model class
+
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(128))
+    password_hash = db.Column(db.String(128))
 
 
     def check_password(self, password):
@@ -47,17 +49,11 @@ class User(UserMixin):
     def get_id(self):
         return self.username
 
-#A dictionary of default users
-all_users = {
-    "admin": User("admin", generate_password_hash("secret")),
-    "bob": User("bob", generate_password_hash("less-secret")),
-    "caroline": User("caroline", generate_password_hash("completely-secret")),
-}
 
 #A function that accepts a string(username) and returns a corresponding User object from a dictionary
 @login_manager.user_loader
 def load_user(user_id):
-    return all_users.get(user_id)
+    return User.query.filter_by(username=user_id).first()
 
 #Defines a class to hold the comments using a model
 class Comment(db.Model):
@@ -90,11 +86,9 @@ def login():
         return render_template("login_page.html", error=False)
 
     if request.method == "POST":
-        username = request.form["username"]
-        if username not in all_users:
+        user = load_user(request.form["username"])
+        if user is None:
             return render_template("login_page.html", error=True)
-        else: #If the username is in the list, assign it to the user variable
-            user = all_users[username]
 
         if not user.check_password(request.form["password"]):
             return render_template("login_page.html", error=True)

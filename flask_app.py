@@ -63,6 +63,8 @@ class Comment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.String(4096))
     posted = db.Column(db.DateTime, default=datetime.now)
+    commenter_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    commenter = db.relationship('User', foreign_keys=commenter_id)
 
 #Define the "index" VIEW
 @app.route("/", methods=["GET", "POST"]) # GET allows users to view the page, POST sends data
@@ -74,7 +76,7 @@ def index():
     if request.method == "POST":
         if not current_user.is_authenticated: #If the user is not logged in, redirect them to same page, but do not post the comment
             return redirect(url_for('index'))
-        comment = Comment(content=request.form["contents"]) #Creates the comment object and assigns it to a variable
+        comment = Comment(content=request.form["contents"], commenter=current_user) #Creates the comment object and assigns it to a variable
         db.session.add(comment) #Sends the command to the database, leaves a transaction open
         db.session.commit() #Commits the changes to the db and closes the transaction
         return redirect (url_for('index'))

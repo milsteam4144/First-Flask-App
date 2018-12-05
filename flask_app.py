@@ -1,11 +1,16 @@
 # A simple blog using flask with a database
 
+#https://www.bogotobogo.com/python/Flask/Python_Flask_Blog_App_Tutorial_5.php
+
 from flask import Flask, redirect, render_template, request, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import login_user, LoginManager, UserMixin, logout_user, login_required, current_user
 from werkzeug.security import check_password_hash
 from datetime import datetime
+import os
+import uuid
+import json
 
 
 app = Flask(__name__)
@@ -26,6 +31,11 @@ db = SQLAlchemy(app)
 
 #Enable Flask Migrate
 migrate = Migrate(app, db)
+
+#Set path to images
+UPLOAD_FOLDER = '/home/milsteam4144/mysite/images/'
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+
 
 #Set up the login system
 app.secret_key = "bdyew87ahdiuaWGS0'MG" # Secret random key used for cryptography
@@ -62,6 +72,7 @@ class Comment(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.String(4096))
+    image = db.Column(db.String(500))
     posted = db.Column(db.DateTime, default=datetime.now)
     commenter_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     commenter = db.relationship('User', foreign_keys=commenter_id)
@@ -74,12 +85,24 @@ def index():
 
     #If the request is not a GET, it is a POST (send data) and this code will execute
     if request.method == "POST":
+        file = request.files['file']
+        extension = os.path.splitext(file.filename)[1]
+        f_name = str(uuid.uuid4()) + extension
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], f_name))
         if not current_user.is_authenticated: #If the user is not logged in, redirect them to same page, but do not post the comment
             return redirect(url_for('index'))
-        comment = Comment(content=request.form["contents"], commenter=current_user) #Creates the comment object and assigns it to a variable
+        if f_name is None:
+            image = ''
+        else:
+            image =  "/static/" + f_name
+        comment = Comment(content=request.form["contents"], commenter=current_user, image=image) #Creates the comment object and assigns it to a variable
         db.session.add(comment) #Sends the command to the database, leaves a transaction open
         db.session.commit() #Commits the changes to the db and closes the transaction
         return redirect (url_for('index'))
+
+
+
+
 
 #Login VIEW
 @app.route("/login/", methods=["GET", "POST"])

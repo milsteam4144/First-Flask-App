@@ -10,6 +10,39 @@
         integrity="sha512-dTfge/zgoMYpP7QbHy4gWMEGsbsdZeCXz7irItjcC3sPUFtf0kuFbDz/ixG7ArTxmDjLXDmezHubeNikyKGVyQ=="
         crossorigin="anonymous">
 
+        <!--CSS FOR THE PHOTO BUTTON-->
+        <style>
+        .btn-file {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-file input[type=file] {
+            position: absolute;
+            top: 0;
+            right: 0;
+            min-width: 100%;
+            min-height: 100%;
+            font-size: 100px;
+            text-align: right;
+            filter: alpha(opacity=0);
+            opacity: 0;
+            outline: none;
+            background: white;
+            cursor: inherit;
+            display: block;
+        }
+    </style>
+
+
+<script src="/home/milsteam4144/mysite/templates/jquery-3.1.1.js"></script>
+<script src="/home/milsteam4144/mysite/templates/jquery.ui.widget.js"></script>
+
+<script type="text/javascript" src="/home/milsteam4144/mysite/templates/jquery.fileupload.js"></script>
+<script type="text/javascript" src="/home/milsteam4144/mysite/templates/jquery.fileupload-process.js"></script>
+<script type="text/javascript" src="/home/milsteam4144/mysite/templates/jquery.fileupload-ui.js"></script>
+
+
         <title>Mallory's Comments</title>
     </head>
 
@@ -40,8 +73,15 @@
 
     <div class="container">
 
+        <!--<img src="/static/38f271c1-889d-4c60-80fa-385dc1703219.jpg" alt="NONE" height= "100" width = "100">-->
+
         {% for comment in comments %}
             <div class="row" style="margin-bottom: 1ex">
+                <div>
+                    <!--{% if comment.image %}-->
+                    <img src= {{comment.image}} alt="Comment Image" height = "200" width = "300">
+                    <!--{% endif %}-->
+                </div>
                 <div>
                     {{ comment.content }}
                 </div>
@@ -67,16 +107,73 @@
 
             {% if current_user.is_authenticated %} <!--IF THE USER IS LOGGED IN, MAKE THE "ENTER A COMMENT" SECTION VIEWABLE-->
 
-            <div class="row">
 
-                <form action="." method="POST">
-                    <textarea class="form-control" name="contents" placeholder="Enter a comment"></textarea>
-                    <input type="submit" class="btn btn-success" value="Post Comment">
+                <br><br>
+                <legend>Create Your Blog Post</legend>
+
+                <form action="." method="POST" enctype="multipart/form-data">
+
+                    <!--<textarea class="form-control" name="image" placeholder="Insert Image"></textarea>
+                    <input type="submit" class="btn btn-primary btn-file" value="Upload Image">-->
+
+                    <div class="form-group">
+                <label for="txtPost">Photos</label>
+
+                <div class="input-group">
+                    <span class="input-group-btn">
+                    <span class="btn btn-primary btn-file">
+                        Browse… <input type="file" id="fileupload" name="file" multiple>
+                    </span>
+                    </span>
+                    <input type="text" class="form-control" readonly>
+                </div>
+
+            </div>
+
+                <div class="form-group">
+                <label for="txtPost">Description</label>
+
+                <textarea class="form-control" id="txtPost" name="contents"></textarea>
+
+            </div>
+            <div class="form-group">
+
+                <p class="text-center">
+                    <input class="btn btn-primary" type="submit" value="Publish" />
+                </p>
+            </div>
+
+                    <!--<textarea class="form-control" name="contents" placeholder="Enter a comment"></textarea>
+                    <input type="submit" class="btn btn-success" value="Post Comment">-->
+
 
                 </form>
 
             </div>
             {% endif %}
+
+            <!--JAVASCRIPT TO SHOW FILE UPLOAD-->
+       <script>
+  $(function(){
+        $('#fileupload').fileupload({
+            url: 'upload',
+            dataType: 'json',
+            add: function (e, data) {
+              data.submit();
+            },
+            success:function(response,status) {
+              console.log(response.filename);
+              var filePath = '/home/milsteam4144/mysite/images/' + response.filename;
+              $('#imgUpload').attr('src',filePath);
+              $('#filePath').val(filePath);
+              console.log('success');
+            },
+            error:function(error){
+                    console.log(error);
+            }
+        });
+  })
+</script>
 
     </div><!-- /.container -->
 

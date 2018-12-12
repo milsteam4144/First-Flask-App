@@ -70,7 +70,9 @@ class Comment(db.Model):
 
     __tablename__ = "comments"
 
+
     id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100))
     content = db.Column(db.String(4096))
     image = db.Column(db.String(500))
     posted = db.Column(db.DateTime, default=datetime.now)
@@ -95,7 +97,7 @@ def index():
             image = ''
         else:
             image =  "/static/" + f_name
-        comment = Comment(content=request.form["contents"], commenter=current_user, image=image) #Creates the comment object and assigns it to a variable
+        comment = Comment(content=request.form["contents"], commenter=current_user, image=image, title = request.form["title"] ) #Creates the comment object and assigns it to a variable
         db.session.add(comment) #Sends the command to the database, leaves a transaction open
         db.session.commit() #Commits the changes to the db and closes the transaction
         return redirect (url_for('index'))

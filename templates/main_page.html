@@ -34,13 +34,13 @@
         }
     </style>
 
+<!--JQUERY FOR FUTURE USE-->
+<!--<script src="/static/jquery-3.1.1.js"></script>
+<script src="/static/jquery.ui.widget.js"></script>
 
-<script src="/home/milsteam4144/mysite/templates/jquery-3.1.1.js"></script>
-<script src="/home/milsteam4144/mysite/templates/jquery.ui.widget.js"></script>
-
-<script type="text/javascript" src="/home/milsteam4144/mysite/templates/jquery.fileupload.js"></script>
-<script type="text/javascript" src="/home/milsteam4144/mysite/templates/jquery.fileupload-process.js"></script>
-<script type="text/javascript" src="/home/milsteam4144/mysite/templates/jquery.fileupload-ui.js"></script>
+<script type="text/javascript" src="/static/jquery.fileupload.js"></script>
+<script type="text/javascript" src="/static/jquery.fileupload-process.js"></script>
+<script type="text/javascript" src="/static/jquery.fileupload-ui.js"></script>-->
 
 
         <title>Mallory's Comments</title>
@@ -73,17 +73,22 @@
 
     <div class="container">
 
-        <!--<img src="/static/38f271c1-889d-4c60-80fa-385dc1703219.jpg" alt="NONE" height= "100" width = "100">-->
 
         {% for comment in comments %}
             <div class="row" style="margin-bottom: 1ex">
                 <div>
-                    <!--{% if comment.image %}-->
+                    {% if comment.image %}
                     <img src= {{comment.image}} alt="Comment Image" height = "200" width = "300">
-                    <!--{% endif %}-->
+                    {% endif %}
                 </div>
                 <div>
+                    {% if comment.title %}
+                    <font size="20"<strong>{{comment.title}}</strong></font>
+                    {% endif %}
+                    <br><br>
+                    {% if comment.content %}
                     {{ comment.content }}
+                     {% endif %}
                 </div>
                 <div>
                 <small>
@@ -100,6 +105,7 @@
                     anonymous
                     {% endif %}
                 </small>
+                <br><br><br><br>
                 </div>
             </div>
         {% endfor %}
@@ -130,6 +136,14 @@
 
             </div>
 
+
+                <div class="form-group">
+                <label for="titlePost">Post Title</label>
+
+                <textarea class="form-control" id="titlePost" name="title"></textarea>
+
+            </div>
+
                 <div class="form-group">
                 <label for="txtPost">Description</label>
 
@@ -152,18 +166,18 @@
             </div>
             {% endif %}
 
-            <!--JAVASCRIPT TO SHOW FILE UPLOAD-->
+            <!--JQUERY FOR FUTURE USE-
        <script>
   $(function(){
         $('#fileupload').fileupload({
-            url: 'upload',
+            url: '/',
             dataType: 'json',
             add: function (e, data) {
               data.submit();
             },
             success:function(response,status) {
               console.log(response.filename);
-              var filePath = '/home/milsteam4144/mysite/images/' + response.filename;
+              var filePath = '/static/' + response.filename;
               $('#imgUpload').attr('src',filePath);
               $('#filePath').val(filePath);
               console.log('success');
@@ -173,7 +187,7 @@
             }
         });
   })
-</script>
+</script>-->
 
     </div><!-- /.container -->
 

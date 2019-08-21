@@ -1,2 +1,6 @@
-# First-Flask-App
-Flask app that allows user to post and view comments, uses DB
+# Flask Blog
+
+Simple Blog web application that shares posts with timestamps, photos, and tracks users.
+Uses a Sqlite 3 database and Python's Flask web framework.
+
+http://milsteam4144.pythonanywhere.com/
